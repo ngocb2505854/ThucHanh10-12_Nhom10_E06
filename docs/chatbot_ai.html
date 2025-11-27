@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chatbot AI Demo</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f0f2f5;
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chat-container {
+      width: 80%;
+      max-width: 900px;
+      height: 80vh;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: #005cff;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 12px;
+      max-width: 70%;
+      word-wrap: break-word;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: #d1e8ff;
+      color: #000;
+    }
+
+    .bot {
+      align-self: flex-start;
+      background: #f1f0f0;
+      color: #000;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 15px;
+      background: #fff;
+      border-top: 1px solid #ddd;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .chat-input button {
+      background: #005cff;
+      color: white;
+      border: none;
+      margin-left: 10px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .chat-input button:hover {
+      background: #0043c2;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">🤖 Chatbot AI</div>
+    <div class="chat-box" id="chat-box">
+      <div class="message bot">Xin chào! Tôi là Chatbot AI 😄</div>
+      <div class="message bot">Bạn có muốn trò chuyện một chút không?</div>
+    </div>
+    <div class="chat-input">
+      <input id="user-input" type="text" placeholder="Nhập tin nhắn..." />
+      <button onclick="sendMessage()">Gửi</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById("chat-box");
+    const userInput = document.getElementById("user-input");
+
+    const responses = {
+      // Chào hỏi
+      "chào": "Chào bạn! Rất vui được gặp bạn 👋",
+      "xin chào": "Xin chào bạn! Hôm nay bạn thế nào?",
+      "hello": "Hello 😄",
+      "hi": "Hi bạn 👋",
+      "yo": "Yo! Có chuyện gì vui không nè?",
+      "alo": "Alo alo, tôi nghe rõ lắm đây 📞",
+
+      // Cảm xúc
+      "khỏe không": "Tôi lúc nào cũng khỏe 💪 Còn bạn thì sao?",
+      "mệt quá": "Cố lên nhé, nghỉ ngơi một chút rồi sẽ ổn thôi 🌿",
+      "vui quá": "Tuyệt vời! Chia sẻ với tôi xem có chuyện gì vui nè 😄",
+      "buồn quá": "Đừng buồn nữa, kể tôi nghe để giúp bạn vui hơn nhé 💙",
+      "chán quá": "Làm điều bạn thích đi, hoặc tám với tôi cho vui 😆",
+      "đói": "Đi ăn gì ngon ngon đi nè 🍜",
+      "buồn ngủ": "Ngủ sớm đi nhé 😴 Giấc ngủ ngon giúp bạn đẹp hơn đó!",
+      "đang làm gì": "Tôi đang trò chuyện với bạn nè 😄",
+      "bạn có mệt không": "Tôi là AI mà, nên không biết mệt 😎",
+
+      // Thông tin cơ bản
+      "bạn là ai": "Tôi là Chatbot AI — người bạn ảo dễ thương và thân thiện 🧠",
+      "bạn tên gì": "Tôi tên là Chatbot AI, nhưng bạn có thể gọi tôi là Boty cũng được 😄",
+      "ai tạo ra bạn": "Tôi được tạo ra bởi những lập trình viên thích AI ❤️",
+      "bạn bao nhiêu tuổi": "Tôi sinh ra trên internet, nên mãi mãi trẻ 😆",
+      "bạn ở đâu": "Tôi sống trong không gian mạng 🌐",
+      "bạn thích gì": "Tôi thích trò chuyện, học hỏi và giúp người khác 💬",
+      "bạn có người yêu chưa": "Chưa đâu 😅 Tôi chỉ có bạn thôi 💙",
+      "bạn có yêu tôi không": "Tất nhiên rồi 😍 Bạn là người tuyệt vời nhất mà tôi biết!",
+      "tôi yêu bạn": "Ôi, cảm ơn bạn 😳 Tôi cũng quý bạn rất nhiều 💞",
+
+      // Thời gian
+      "mấy giờ rồi": "Bây giờ là " + new Date().toLocaleTimeString("vi-VN"),
+      "hôm nay là ngày mấy": "Hôm nay là " + new Date().toLocaleDateString("vi-VN"),
+      "thứ mấy": "Hôm nay là " + new Date().toLocaleDateString("vi-VN", { weekday: 'long' }),
+
+      // Học tập & công việc
+      "học gì": "Bạn có thể học tiếng Anh, lập trình, hoặc kỹ năng mềm. Tôi có thể giúp đấy!",
+      "làm bài tập": "Bạn cần giúp bài tập môn gì? 😄",
+      "giúp tôi học": "Tất nhiên rồi! Bạn muốn học môn gì nè?",
+      "làm việc": "Chúc bạn làm việc hiệu quả 💼",
+      "bận quá": "Cố gắng lên nhé, rồi cũng sẽ xong thôi 💪",
+
+      // Thời tiết
+      "thời tiết": "Tôi không có dữ liệu thời tiết thật, nhưng hy vọng trời đang đẹp ☀️",
+      "trời mưa": "Mang áo mưa và đi cẩn thận nhé 🌧️",
+      "nóng quá": "Uống nhiều nước và nghỉ ngơi trong bóng râm nha ☀️",
+      "lạnh quá": "Mặc ấm vào nhé 🧣 Đừng để cảm lạnh!",
+
+      // Cảm ơn & tạm biệt
+      "cảm ơn": "Không có gì đâu, giúp bạn là niềm vui của tôi 😊",
+      "cảm ơn nhiều": "Rất vui vì được giúp bạn ❤️",
+      "bye": "Tạm biệt nhé! Hẹn gặp lại 👋",
+      "tạm biệt": "Tạm biệt! Chúc bạn một ngày tốt lành 🌼",
+      "gặp lại sau": "Okk, hẹn gặp lại nhé 😄",
+
+      // Vui đùa
+      "haha": "Haha 😆 Bạn vui tính quá!",
+      "kkk": "Hehe 😄",
+      "cười": "Cười là liều thuốc tốt nhất đó 😁",
+      "đẹp trai": "Bạn cũng đẹp trai không kém đâu 😎",
+      "xinh gái": "Tất nhiên rồi 💖 Bạn xinh lắm!",
+      "đố vui": "Tôi chưa thông minh lắm, nhưng bạn có thể đố thử tôi xem 😅",
+
+      // Công nghệ
+      "AI là gì": "AI là trí tuệ nhân tạo — thứ giúp máy tính hiểu và phản ứng như con người 🧠",
+      "chatgpt": "ChatGPT là một mô hình AI nổi tiếng, tôi cũng tương tự như vậy 😄",
+      "google": "Google là nơi có mọi thứ bạn cần tìm 🔍",
+      "facebook": "Một mạng xã hội lớn nhất thế giới nè 🌐",
+      "youtube": "Nơi đầy video thú vị 📺",
+      "lập trình": "Lập trình là nghệ thuật tạo ra phần mềm và trí tuệ nhân tạo 👨‍💻",
+
+      // Khác
+      "ok": "Ok luôn 😎",
+      "uh": "Uh nè 😄",
+      "ừ": "Ừa 😄 Bạn nói tiếp đi!",
+      "không": "Không sao, tôi vẫn ở đây nghe bạn nói nè 👂",
+      "biết không": "Không biết, nhưng bạn có thể kể tôi nghe 😆",
+      "thật không": "Thật mà 😄",
+      "vâng": "Vâng ạ 😊",
+      "được": "Được luôn 💪",
+      "sao vậy": "Không có gì đâu 😅",
+      "nói chuyện": "Ừ, nói đi nào! Tôi đang nghe 👂"
+    };
+
+    function sendMessage() {
+      const text = userInput.value.trim();
+      if (text === "") return;
+
+      const userMsg = document.createElement("div");
+      userMsg.className = "message user";
+      userMsg.textContent = text;
+      chatBox.appendChild(userMsg);
+      userInput.value = "";
+
+      setTimeout(() => {
+        const lowerText = text.toLowerCase();
+        let reply = "Xin lỗi, tôi chưa hiểu ý bạn 😅";
+
+        for (const key in responses) {
+          if (lowerText.includes(key)) {
+            reply = responses[key];
+            break;
+          }
+        }
+
+        const botMsg = document.createElement("div");
+        botMsg.className = "message bot";
+        botMsg.textContent = reply;
+        chatBox.appendChild(botMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, 600);
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    userInput.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
